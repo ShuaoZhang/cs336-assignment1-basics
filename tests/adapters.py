@@ -9,6 +9,7 @@ import numpy.typing as npt
 import torch
 from torch import Tensor
 
+from cs336_basics.linear import MyLinear
 
 
 def run_linear(
@@ -25,12 +26,15 @@ def run_linear(
         out_dim (int): The size of the output dimension
         weights (Float[Tensor, "d_out d_in"]): The linear weights to use
         in_features (Float[Tensor, "... d_in"]): The output tensor to apply the function to
-    
+
     Returns:
         Float[Tensor, "... d_out"]: The transformed output of your linear module.
     """
 
-    raise NotImplementedError
+    linear = MyLinear(d_in, d_out)
+    linear.load_state_dict({"layer": weights})
+
+    return linear.forward(in_features)
 
 
 def run_embedding(
@@ -47,7 +51,7 @@ def run_embedding(
         d_model (int): The size of the embedding dimension
         weights (Float[Tensor, "vocab_size d_model"]): The embedding vectors to fetch from
         token_ids (Int[Tensor, "..."]): The set of token ids to fetch from the Embedding layer
-    
+
     Returns:
         Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
     """
@@ -302,7 +306,7 @@ def run_transformer_lm(
             evenly divisible by `num_heads`.
         d_ff (int): Dimensionality of the feed-forward inner layer (section 3.3).
         rope_theta (float): The RoPE $\Theta$ parameter.
-        weights (dict[str, Tensor]): 
+        weights (dict[str, Tensor]):
             State dict of our reference implementation. {num_layers} refers to an
             integer between `0` and `num_layers - 1` (the layer index).
             The keys of this dictionary are:
@@ -435,7 +439,9 @@ def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, "
     raise NotImplementedError
 
 
-def run_cross_entropy(inputs: Float[Tensor, " batch_size vocab_size"], targets: Int[Tensor, " batch_size"]) -> Float[Tensor, ""]:
+def run_cross_entropy(
+    inputs: Float[Tensor, " batch_size vocab_size"], targets: Int[Tensor, " batch_size"]
+) -> Float[Tensor, ""]:
     """Given a tensor of inputs and targets, compute the average cross-entropy
     loss across examples.
 
