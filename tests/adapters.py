@@ -11,6 +11,9 @@ from torch import Tensor
 
 from cs336_basics.linear import MyLinear
 from cs336_basics.embedding import MyEmbedding
+from cs336_basics.transformer_block import MyRMSNorm
+from cs336_basics.transformer_block import MySiLU
+from cs336_basics.transformer_block import MySwiGLU
 
 
 def run_linear(
@@ -35,7 +38,7 @@ def run_linear(
     linear = MyLinear(d_in, d_out)
     linear.load_state_dict({"layer": weights})
 
-    return linear.forward(in_features)
+    return linear(in_features)
 
 
 def run_embedding(
@@ -60,7 +63,7 @@ def run_embedding(
     embedding = MyEmbedding(vocab_size, d_model)
     embedding.load_state_dict({"layer": weights})
 
-    return embedding.forward(token_ids)
+    return embedding(token_ids)
 
 def run_swiglu(
     d_model: int,
@@ -91,7 +94,10 @@ def run_swiglu(
     # swiglu.w1.weight.data = w1_weight
     # swiglu.w2.weight.data = w2_weight
     # swiglu.w3.weight.data = w3_weight
-    raise NotImplementedError
+
+    swi_glu = MySwiGLU(d_model, d_ff)
+    swi_glu.load_state_dict({"w1": w1_weight, "w2": w2_weight, "w3": w3_weight})
+    return swi_glu(in_features)
 
 
 def run_scaled_dot_product_attention(
@@ -386,7 +392,10 @@ def run_rmsnorm(
         Float[Tensor,"... d_model"]: Tensor of with the same shape as `in_features` with the output of running
         RMSNorm of the `in_features`.
     """
-    raise NotImplementedError
+    rms_norm = MyRMSNorm(d_model, eps)
+    rms_norm.load_state_dict({"g": weights})
+
+    return rms_norm(in_features)
 
 
 def run_silu(in_features: Float[Tensor, " ..."]) -> Float[Tensor, " ..."]:
@@ -400,7 +409,8 @@ def run_silu(in_features: Float[Tensor, " ..."]) -> Float[Tensor, " ..."]:
         Float[Tensor,"..."]: of with the same shape as `in_features` with the output of applying
         SiLU to each element.
     """
-    raise NotImplementedError
+    silu = MySiLU()
+    return silu(in_features)
 
 
 def run_get_batch(
