@@ -14,7 +14,7 @@ class MyLinear(nn.Module):
             out_features, in_features, device=device, dtype=dtype
         )
         std = math.sqrt(2 / (in_features + out_features))
-        w = nn.init.trunc_normal_(w, std=std, a=-3*std, b=3*std)
+        w = nn.init.trunc_normal_(w, std=std, a=-3 * std, b=3 * std)
         self.layer = nn.Parameter(w)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

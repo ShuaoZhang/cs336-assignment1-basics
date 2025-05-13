@@ -14,6 +14,8 @@ from cs336_basics.embedding import MyEmbedding
 from cs336_basics.transformer_block import MyRMSNorm
 from cs336_basics.transformer_block import MySiLU
 from cs336_basics.transformer_block import MySwiGLU
+from cs336_basics.transformer_block import MyRoPE
+from cs336_basics.transformer_block import softmax, scaled_dot_product_attention
 
 
 def run_linear(
@@ -64,6 +66,7 @@ def run_embedding(
     embedding.load_state_dict({"layer": weights})
 
     return embedding(token_ids)
+
 
 def run_swiglu(
     d_model: int,
@@ -118,7 +121,7 @@ def run_scaled_dot_product_attention(
     Returns:
         Float[Tensor, " ... queries d_v"]: Output of SDPA
     """
-    raise NotImplementedError
+    return scaled_dot_product_attention(Q, K, V, mask)
 
 
 def run_multihead_self_attention(
@@ -214,7 +217,9 @@ def run_rope(
     Returns:
         Float[Tensor, " ... sequence_length d_k"]: Tensor with RoPEd input.
     """
-    raise NotImplementedError
+    rope = MyRoPE(theta=theta, d_k=d_k, max_seq_len=max_seq_len)
+
+    return rope(in_query_or_key, token_positions)
 
 
 def run_transformer_block(
@@ -449,7 +454,7 @@ def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, "
         Float[Tensor, "..."]: Tensor of with the same shape as `in_features` with the output of
         softmax normalizing the specified `dim`.
     """
-    raise NotImplementedError
+    return softmax(in_features, dim)
 
 
 def run_cross_entropy(
@@ -470,7 +475,9 @@ def run_cross_entropy(
     raise NotImplementedError
 
 
-def run_gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm: float) -> None:
+def run_gradient_clipping(
+    parameters: Iterable[torch.nn.Parameter], max_l2_norm: float
+) -> None:
     """Given a set of parameters, clip their combined gradients to have l2 norm at most max_l2_norm.
 
     Args:
